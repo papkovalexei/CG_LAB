@@ -1,61 +1,27 @@
-#include "Image.h"
 #include <cmath>
 
-void swapIntH(int& x, int& y)
-{
-	int temp = x;
-	x = y;
-	y = temp;
-}
-
-void WuLine(int x0, int y0, int x1, int y1, float thickness, Image& image)
-{
-	bool steep = abs(y1 - y0) > abs(x1 - x0);
-
-	if (steep)
-	{
-		swapIntH(x0, y0);
-		swapIntH(x1, y1);
-	}
-
-	if (x0 > x1)
-	{
-		swapIntH(x0, x1);
-		swapIntH(y0, y1);
-	}
-
-	image.setPixel(steep, x0, y0, 1);
-	image.setPixel(steep, x1, y1, 1);
-
-	float dx = x1 - x0;
-	float dy = y1 - y0;
-
-	float gradient = dy / dx;
-	float y = y0 + gradient;
-
-	for (int x = x0 + 1; x <= x1 - 1; x++)
-	{
-		for (float temp = y - thickness / 2; temp <= y + thickness / 2; temp += gradient)
-		{
-
-			image.setPixel(steep, x, (int)temp, 1 - (temp - (int)temp));
-			image.setPixel(steep, x, (int)temp + 1, temp - (int)temp);
-		}
-		y += gradient;
-	}
-
-}
+#include "Instruments.h"
 
 int main(int argc, char** argv)
 {
-	// lab3.exe file.pnm newFile.pnm x0 y0 x1 y1
-	Image image;
+	// lab3.exe file.pnm newFile.pnm brit width x0 y0 x1 y1 gamma
 
-	image.readFile(argv[1]);
+	if (argc < 8)
+		cerr << "Error input data" << endl;
+	else
+	{
+		Instruments instrument;
 
-	WuLine(0, 0, 60, 80, 4, image);
+		if (argc == 10)
+			instrument.setGamma(atof(argv[9]));
+		
 
-	image.writeFile(argv[2]);
+		instrument.readFile(argv[1]);
+
+		instrument.drawLine(atof(argv[5]), atof(argv[6]), atof(argv[7]), atof(argv[8]), atof(argv[4]), atof(argv[3]));
+
+		instrument.writeFile(argv[2]);
+	}
 
 	return 0;
 }

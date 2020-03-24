@@ -2,13 +2,6 @@
 
 #include "Image.h"
 
-void swapInt(int& x, int& y)
-{
-	int temp = x;
-	x = y;
-	y = temp;
-}
-
 void Image::readFile(std::string filePath)
 {
 	char buffer[16];
@@ -18,7 +11,7 @@ void Image::readFile(std::string filePath)
 
 	if (!input_file)
 	{
-		std::cout << "Error open file: " << filePath << std::endl;
+		std::cerr << "Error open file: " << filePath << std::endl;
 		exit(1);
 	}
 
@@ -26,13 +19,13 @@ void Image::readFile(std::string filePath)
 
 	if (buffer[0] != 'P' || strlen(buffer) > 3)
 	{
-		std::cout << "Error image format" << std::endl;
+		std::cerr << "Error image format" << std::endl;
 		exit(1);
 	}
 
 	if (buffer[1] != '5')
 	{
-		std::cout << "File format not supported" << std::endl;
+		std::cerr << "File format not supported" << std::endl;
 		exit(1);
 	}
 
@@ -46,7 +39,7 @@ void Image::readFile(std::string filePath)
 
 	if (fscanf(input_file, "%i %i\n%i\n", &weight, &height, &depthPixel) != 3)
 	{
-		printf("Error read file\n");
+		std::cerr << "Error read file" << std::endl;
 		exit(1);
 	}
 
@@ -54,7 +47,7 @@ void Image::readFile(std::string filePath)
 
 	if (fread(Image::data, sizeof(uchar), Image::height * Image::weight, input_file) != Image::weight * Image::height)
 	{
-		printf("Error read file\n");
+		std::cerr << "Error read file" << std::endl;
 		exit(1);
 	}
 
@@ -66,14 +59,14 @@ void Image::writeFile(std::string filePath)
 	FILE* output_file = fopen(filePath.c_str(), "wb");
 
 	fprintf(output_file, "P5\n");
-	
+
 	fprintf(output_file, "# Created by Alexei Papkov M3111\n");
 
 	fprintf(output_file, "%i %i\n%i\n", Image::weight, Image::height, Image::depthPixel);
 
 	if (fwrite(Image::data, sizeof(uchar), Image::height * Image::weight, output_file) != Image::weight * Image::height)
 	{
-		printf("Error write file\n");
+		std::cerr << "Error write file" << std::endl;
 		fclose(output_file);
 		exit(1);
 	}
@@ -81,25 +74,12 @@ void Image::writeFile(std::string filePath)
 	fclose(output_file);
 }
 
-double gammaCorrection(double color)
+void Image::setPixel(int x, int y, int color)
 {
-	return pow(color, 1.0/2.2);
+	data[weight * y + x] = color;
 }
 
-void Image::setPixel(bool steep, int x, int y, double color)
+uchar Image::getPixel(int x, int y)
 {
-	color = gammaCorrection(color);
-
-	if (steep)
-	{
-		swapInt(x, y);
-	}
-	uchar color_buffer = 255 - color * 255;
-
-	data[weight * y + x] = color_buffer;
-}
-
-void Image::setPixel(int x, int y)
-{
-	data[weight * y + x] = 0;
+	return data[weight * y + x];
 }
