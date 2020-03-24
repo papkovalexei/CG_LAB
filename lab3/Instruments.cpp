@@ -12,7 +12,7 @@ uchar Instruments::colorCorrection(double color, int x, int y)
 	return (255 - pow(color, 1.0 / gamma) * 255);
 }
 
-void Instruments::BresenhamLine(int x0, int y0, int x1, int y1, double color)
+void Instruments::stairsLine(int x0, int y0, int x1, int y1, double color)
 {
 	bool steep = abs(y1 - y0) >abs(x1 - x0); 
 	
@@ -32,6 +32,7 @@ void Instruments::BresenhamLine(int x0, int y0, int x1, int y1, double color)
 	int error = dx / 2; 
 	int ystep = (y0 < y1) ? 1 : -1; 
 	int y = y0;
+
 	for (int x = x0; x <= x1; x++)
 	{
 		if (steep)
@@ -48,7 +49,7 @@ void Instruments::BresenhamLine(int x0, int y0, int x1, int y1, double color)
 	}
 }
 
-void Instruments::WuLine(int x0, int y0, int x1, int y1, double color)
+void Instruments::line(int x0, int y0, int x1, int y1, double color)
 {
 	bool steep = abs(y1 - y0) > abs(x1 - x0);
 
@@ -211,8 +212,8 @@ void Instruments::drawLine(int x0, int y0, int x1, int y1, double width, double 
 		drawLine(vertex1.x0, vertex1.y0, vertex1.x1, vertex1.y1, color, array_points_n1);
 		drawLine(vertex2.x0, vertex2.y0, vertex2.x1, vertex2.y1, color, array_points_n2);
 
-		WuLine(vertex1.x0, vertex1.y0, vertex2.x0, vertex2.y0, color);
-		WuLine(vertex2.x1, vertex2.y1, vertex1.x1, vertex1.y1, color);
+		line(vertex1.x0, vertex1.y0, vertex2.x0, vertex2.y0, color);
+		line(vertex2.x1, vertex2.y1, vertex1.x1, vertex1.y1, color);
 
 		for (int i = 0; i < array_points_n1.size(); i++)
 		{
@@ -224,9 +225,9 @@ void Instruments::drawLine(int x0, int y0, int x1, int y1, double width, double 
 			toVertex_x = array_points_n2[i].first;
 			toVertex_y = array_points_n2[i].second;
 
-			BresenhamLine(vertex_x, vertex_y, toVertex_x, toVertex_y, color);
+			stairsLine(vertex_x, vertex_y, toVertex_x, toVertex_y, color);
 		}
 	}
 	else
-		WuLine(x0, y0, x1, y1, color);
+		line(x0, y0, x1, y1, color);
 }

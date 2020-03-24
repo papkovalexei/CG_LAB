@@ -22,8 +22,8 @@ public:
 		gamma = gamma1;
 	}
 private:
-	void BresenhamLine(int x0, int y0, int x1, int y1, double color);
-	void WuLine(int x0, int y0, int x1, int y1, double color);
+	void stairsLine(int x0, int y0, int x1, int y1, double color);
+	void line(int x0, int y0, int x1, int y1, double color);
 	uchar colorCorrection(double color, int x, int y);
 	double gamma = 2.2;
 };
