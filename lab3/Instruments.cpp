@@ -27,6 +27,7 @@ void Instruments::stairsLine(int x0, int y0, int x1, int y1, double color)
 		swapIntH(x0, x1);
 		swapIntH(y0, y1);
 	}
+
 	int dx = x1 - x0;
 	int dy = abs(y1 - y0);
 	int error = dx / 2; 
@@ -109,7 +110,7 @@ Normal createNormal(int x0, int y0, int x1, int y1, double width)
 
 		v.x0 = x0;
 		v.x1 = x0 + width - 1;
-		v.y0 = y0;
+		v.y0 = y1;
 		v.y1 = y1;
 
 		return v;
@@ -166,11 +167,16 @@ void Instruments::drawLine(int x0, int y0, int x1, int y1, double color, vector<
 	{
 		setPixel(y0, x0, colorCorrection(color, y0, x0));
 		setPixel(y1, x1, colorCorrection(color, y1, x1));
+		array.push_back(pair<int, int>(y0, x0));
+		array.push_back(pair<int, int>(y1, x1));
 	}
 	else
 	{
 		setPixel(x0, y0, colorCorrection(color, x0, y0));
 		setPixel(x1, y1, colorCorrection(color, x1, y1));
+
+		array.push_back(pair<int, int>(x0, y0));
+		array.push_back(pair<int, int>(x1, y1));
 	}
 
 	double dx = x1 - x0;
