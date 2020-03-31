@@ -11,14 +11,10 @@ int main(int argc, char** argv)
 	else
 	{
 		Instruments instrument;
-
-		if (argc == 10)
-			instrument.setGamma(atof(argv[9]));
 		
-
 		instrument.readFile(argv[1]);
 
-		instrument.drawLine(atof(argv[5]), atof(argv[6]), atof(argv[7]), atof(argv[8]), atof(argv[4]), atof(argv[3]));
+		instrument.drawLine(Vertex(atof(argv[5]), atof(argv[6])), Vertex(atof(argv[7]), atof(argv[8])), atof(argv[4]), atof(argv[3]));
 
 		instrument.writeFile(argv[2]);
 	}

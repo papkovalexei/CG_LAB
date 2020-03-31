@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <algorithm>
 
 typedef unsigned char uchar;
 
@@ -10,12 +11,11 @@ public:
 	void readFile(std::string filePath);
 	void writeFile(std::string filePath);
 
-	void setPixel(int x, int y, int color);
-	uchar getPixel(int x, int y);
+	void setPixel(int x, int y, uchar color);
 private:
-	int weight, height;
-	int pixelFormat;
-	int depthPixel;
+	int _pixelFormat;
+	int _depthPixel;
 protected:
-	uchar* data;
+	int _width, _height;
+	uchar* _data;
 };

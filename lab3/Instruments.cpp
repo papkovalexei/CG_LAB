@@ -1,239 +1,90 @@
 #include "Instruments.h"
 
-void swapIntH(int& x, int& y)
+double distance(Vertex a, Vertex b)
 {
-	int temp = x;
-	x = y;
-	y = temp;
+	return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
 }
 
-uchar Instruments::colorCorrection(double color, int x, int y)
+uchar Instruments::colorCorrection(double x, double y, double transparency, double brightness)
 {
-	return (255 - pow(color, 1.0 / gamma) * 255);
+	if (y < 0 || y >= _height || x < 0 || x >= _width)
+		throw exception("Incorrect coord");
+
+	transparency = max(0.0, min(1.0, transparency));
+
+	double lineColor = brightness / 255.0;
+	int y1 = y, x1 = x;
+	double sRGBColor = _data[y1 * _width + x1] / 255.0;
+	double imageLineColor = sRGBColor <= 0.04045 ? sRGBColor / 12.92 : pow((sRGBColor + 0.055) / 1.055, 2.4);
+	double color = (1 - transparency) * lineColor + transparency * imageLineColor;
+	double sRGBc = color <= 0.0031308 ? 12.92 * color : 1.055 * pow(color, 1 / 2.4) - 0.055;
+
+	return 255 * sRGBc;
 }
 
-void Instruments::stairsLine(int x0, int y0, int x1, int y1, double color)
+void Instruments::drawLine(Vertex vertex_start, Vertex vertex_end, double thickness, double brightness)
 {
-	bool steep = abs(y1 - y0) >abs(x1 - x0); 
-	
-	if (steep)
-	{
-		swapIntH(x0, y0); 
-		swapIntH(x1, y1);
-	}
+	if (thickness <= 0)
+		throw exception("Incorrect thickness");
 
-	if (x0 > x1)
-	{
-		swapIntH(x0, x1);
-		swapIntH(y0, y1);
-	}
-
-	int dx = x1 - x0;
-	int dy = abs(y1 - y0);
-	int error = dx / 2; 
-	int ystep = (y0 < y1) ? 1 : -1; 
-	int y = y0;
-
-	for (int x = x0; x <= x1; x++)
-	{
-		if (steep)
-			setPixel(y, x, colorCorrection(color, y, x));
-		else
-			setPixel(x, y, colorCorrection(color, x, y));
-
-		error -= dy;
-		if (error < 0)
-		{
-			y += ystep;
-			error += dx;
-		}
-	}
-}
-
-void Instruments::line(int x0, int y0, int x1, int y1, double color)
-{
-	bool steep = abs(y1 - y0) > abs(x1 - x0);
+	bool steep = abs(vertex_start.y - vertex_end.y) > abs(vertex_start.x - vertex_end.x);
 
 	if (steep)
 	{
-		swapIntH(x0, y0);
-		swapIntH(x1, y1);
+		swap(vertex_start.x, vertex_start.y);
+		swap(vertex_end.x, vertex_end.y);
 	}
 
-	if (x0 > x1)
+	if (vertex_start.x > vertex_end.x)
 	{
-		swapIntH(x0, x1);
-		swapIntH(y0, y1);
+		swap(vertex_start.x, vertex_end.x);
+		swap(vertex_start.y, vertex_end.y);
 	}
 
-	if (steep)
-	{
-		setPixel(y0, x0, colorCorrection(color, y0, x0));
-		setPixel(y1, x1, colorCorrection(color, y1, x1));
-	}
-	else
-	{
-		setPixel(x0, y0, colorCorrection(color, x0, y0));
-		setPixel(x1, y1, colorCorrection(color, x1, y1));
-	}
-
-	double dx = x1 - x0;
-	double dy = y1 - y0;
-
+	double dx = vertex_end.x - vertex_start.x;
+	double dy = vertex_end.y - vertex_start.y;
 	double gradient = dy / dx;
-	double y = y0 + gradient;
 
-	for (int x = x0 + 1; x <= x1 - 1; x++)
+	double y = vertex_start.y + gradient * (round(vertex_start.x) - vertex_start.x);
+
+	for (int x = round(vertex_start.x); x < round(vertex_end.x); x++)
 	{
-		if (steep)
+		for (int tempY = (int)(y - ((thickness - 1) / 2)); tempY <= (int)(y - ((thickness - 1) / 2) + thickness); tempY++)
 		{
-			setPixel((int)y, x, colorCorrection(color, (int)y, x) + colorCorrection(1 - (y - (int)y), (int)y, x));
-			setPixel((int)y + 1, x, colorCorrection(color, (int)y + 1, x) + colorCorrection(y - (int)y, (int)y + 1, x));
-		}
-		else
-		{
-			setPixel(x, (int)y, colorCorrection(color, x, (int)y) + colorCorrection(1 - (y - (int)y), x, (int)y));
-			setPixel(x, (int)y + 1, colorCorrection(color, x, (int)y + 1) + colorCorrection(y - (int)y, x, (int)y + 1));
+			if (steep)
+				setPixel(tempY, x, colorCorrection(tempY, x, 1 - min(1.0, (thickness + 1.0) / 2.0 - fabs(y - tempY)), brightness));
+			else
+				setPixel(x, tempY, colorCorrection(x, tempY, 1 - min(1.0, (thickness + 1.0) / 2.0 - fabs(y - tempY)), brightness));
 		}
 		y += gradient;
 	}
-}
 
-Normal createNormal(int x0, int y0, int x1, int y1, double width)
-{
-	int dx = x1 - x0;
-	int dy = y1 - y0;
+	Vertex start = { round(vertex_start.x), round(vertex_start.y) };
+	Vertex end = { round(vertex_end.x), round(vertex_end.y) };
 
-	if (dx == 0)
+	for (int tempX = start.x - thickness / 2; tempX <= start.x; tempX++)
 	{
-		Normal v;
+		y = vertex_start.y + gradient * (tempX - vertex_start.x);
 
-		v.x0 = x0;
-		v.x1 = x0 + width - 1;
-		v.y0 = y1;
-		v.y1 = y1;
-
-		return v;
-	}
-
-	if (dy == 0)
-	{
-		Normal v;
-
-		v.x0 = x0;
-		v.x1 = x0;
-		v.y0 = y0;
-		v.y1 = y1 + width - 1;
-
-		return v;
-	}
-
-	double k = (double)(-dy) / (double)(-dx);
-	double b = (double)(-(x1 * y0) + (y1 * x0)) / (double)(-dx);
-
-	double vertexX1 = ((double)y1 + 1.0f / k * (double)x1 - b - (width-1) * sqrt(pow(k, 2) + 1.0f)) * k / (pow(k, 2) + 1.0f);
-	double vertexX0 = ((double)y1 + 1.0f / k * (double)x1 - b + (width-1) * sqrt(pow(k, 2) + 1.0f)) * k / (pow(k, 2) + 1.0f);
-
-	double vertexY1 = -1.0f / k * vertexX1 + ((double)y1 + (1.0f / k * (double)x1));
-	double vertexY0 = -1.0f / k * vertexX0 + ((double)y1 + (1.0f / k * (double)x1));
-
-	Normal v;
-
-	v.x0 = (int)floor(vertexX0);
-	v.x1 = (int)floor(vertexX1);
-	v.y0 = (int)floor(vertexY0);
-	v.y1 = (int)floor(vertexY1);
-
-	return v;
-}
-
-void Instruments::drawLine(int x0, int y0, int x1, int y1, double color, vector<pair<int, int>>& array)
-{
-	bool steep = abs(y1 - y0) > abs(x1 - x0);
-
-	if (steep)
-	{
-		swapIntH(x0, y0);
-		swapIntH(x1, y1);
-	}
-
-	if (x0 > x1)
-	{
-		swapIntH(x0, x1);
-		swapIntH(y0, y1);
-	}
-
-	if (steep)
-	{
-		setPixel(y0, x0, colorCorrection(color, y0, x0));
-		setPixel(y1, x1, colorCorrection(color, y1, x1));
-		array.push_back(pair<int, int>(y0, x0));
-		array.push_back(pair<int, int>(y1, x1));
-	}
-	else
-	{
-		setPixel(x0, y0, colorCorrection(color, x0, y0));
-		setPixel(x1, y1, colorCorrection(color, x1, y1));
-
-		array.push_back(pair<int, int>(x0, y0));
-		array.push_back(pair<int, int>(x1, y1));
-	}
-
-	double dx = x1 - x0;
-	double dy = y1 - y0;
-
-	double gradient = dy / dx;
-	double y = y0 + gradient;
-
-	for (int x = x0 + 1; x <= x1 - 1; x++)
-	{
-		if (steep)
+		for (int tempY = (int)(y - (thickness - 1) / 2.0); tempY <= (int)(y - (thickness - 1) / 2.0 + thickness); tempY++)
 		{
-			setPixel((int)y, x, colorCorrection(color, (int)y, x) - colorCorrection(y - (int)y, (int)y, x));
-			setPixel((int)y + 1, x, colorCorrection(color, (int)y + 1, x) + colorCorrection(y - (int)y, (int)y + 1, x));
-			array.push_back(pair<int, int>((int)y, x));
-			array.push_back(pair<int, int>((int)y + 1, x));
-		}
-		else
-		{
-			setPixel(x, (int)y, colorCorrection(color, x, (int)y) - colorCorrection(y - (int)y, x, (int)y));
-			setPixel(x, (int)y + 1, colorCorrection(color, x, (int)y + 1) + colorCorrection(y - (int)y, x, (int)y + 1));
-			array.push_back(pair<int, int>(x, (int)y));
-			array.push_back(pair<int, int>(x, (int)y + 1));
-		}
-		y += gradient;
-	}
-}
-
-void Instruments::drawLine(int x0, int y0, int x1, int y1, double width, double color)
-{
-	if (width > 1)
-	{
-		Normal vertex1 = createNormal(x0, y0, x1, y1, width);
-		Normal vertex2 = createNormal(x1, y1, x0, y0, width);
-
-		vector<pair<int, int>> array_points_n1;
-		vector<pair<int, int>> array_points_n2;
-
-		drawLine(vertex1.x0, vertex1.y0, vertex1.x1, vertex1.y1, color, array_points_n1);
-		drawLine(vertex2.x0, vertex2.y0, vertex2.x1, vertex2.y1, color, array_points_n2);
-
-		line(vertex1.x0, vertex1.y0, vertex2.x0, vertex2.y0, color);
-		line(vertex2.x1, vertex2.y1, vertex1.x1, vertex1.y1, color);
-
-		for (int i = 0; i < array_points_n1.size(); i++)
-		{
-			int vertex_x, toVertex_x, vertex_y, toVertex_y;
-
-			vertex_x = array_points_n1[i].first;
-			vertex_y = array_points_n1[i].second;
-
-			toVertex_x = array_points_n2[i].first;
-			toVertex_y = array_points_n2[i].second;
-
-			stairsLine(vertex_x, vertex_y, toVertex_x, toVertex_y, color);
+			if (steep)
+				setPixel(tempY, tempX, colorCorrection(tempY, tempX, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { start.x, start.y })), brightness));
+			else
+				setPixel(tempX, tempY, colorCorrection(tempX, tempY, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { start.x, start.y })), brightness));
 		}
 	}
-	else
-		line(x0, y0, x1, y1, color);
+
+	for (int tempX = end.x; tempX <= end.x + thickness / 2; tempX++)
+	{
+		y = vertex_start.y + gradient * (tempX - vertex_start.x);
+
+		for (int tempY = (int)(y - (thickness - 1) / 2.0); tempY <= (int)(y - (thickness - 1) / 2.0 + thickness); tempY++)
+		{
+			if (steep)
+				setPixel(tempY, tempX, colorCorrection(tempY, tempX, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { end.x, end.y })), brightness));
+			else
+				setPixel(tempX, tempY, colorCorrection(tempX, tempY, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { end.x, end.y })), brightness));
+		}
+	}
 }

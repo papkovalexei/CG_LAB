@@ -6,25 +6,19 @@
 
 using namespace std;
 
-struct Normal
+struct Vertex
 {
-	int x0, y0;
-	int x1, y1;
+	double x;
+	double y;
+
+	Vertex(double x_, double y_) : x(x_), y(y_) {}
 };
 
 class Instruments : public Image
 {
 public:
-	void drawLine(int x0, int y0, int x1, int y1, double width, double color);
-	void drawLine(int x0, int y0, int x1, int y1, double color, vector<pair<int, int>>& array);
-	void setGamma(double gamma1)
-	{
-		gamma = gamma1;
-	}
+	void drawLine(Vertex vertex_start, Vertex vertex_end, double thickness, double brightness);
 private:
-	void stairsLine(int x0, int y0, int x1, int y1, double color);
-	void line(int x0, int y0, int x1, int y1, double color);
-	uchar colorCorrection(double color, int x, int y);
-	double gamma = 2.2;
+	uchar colorCorrection(double x, double y, double transparency, double brightness);
 };
 

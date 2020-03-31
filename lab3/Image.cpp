@@ -37,15 +37,15 @@ void Image::readFile(std::string filePath)
 			;
 	// End 'skip comment'
 
-	if (fscanf(input_file, "%i %i\n%i\n", &weight, &height, &depthPixel) != 3)
+	if (fscanf(input_file, "%i %i\n%i\n", &_width, &_height, &_depthPixel) != 3)
 	{
 		std::cerr << "Error read file" << std::endl;
 		exit(1);
 	}
 
-	Image::data = (uchar*)malloc(Image::weight * Image::height * sizeof(uchar));
+	Image::_data = (uchar*)malloc(Image::_width * Image::_height * sizeof(uchar));
 
-	if (fread(Image::data, sizeof(uchar), Image::height * Image::weight, input_file) != Image::weight * Image::height)
+	if (fread(Image::_data, sizeof(uchar), Image::_height * Image::_width, input_file) != Image::_width * Image::_height)
 	{
 		std::cerr << "Error read file" << std::endl;
 		exit(1);
@@ -62,9 +62,9 @@ void Image::writeFile(std::string filePath)
 
 	fprintf(output_file, "# Created by Alexei Papkov M3111\n");
 
-	fprintf(output_file, "%i %i\n%i\n", Image::weight, Image::height, Image::depthPixel);
+	fprintf(output_file, "%i %i\n%i\n", Image::_width, Image::_height, Image::_depthPixel);
 
-	if (fwrite(Image::data, sizeof(uchar), Image::height * Image::weight, output_file) != Image::weight * Image::height)
+	if (fwrite(Image::_data, sizeof(uchar), Image::_height * Image::_width, output_file) != Image::_width * Image::_height)
 	{
 		std::cerr << "Error write file" << std::endl;
 		fclose(output_file);
@@ -74,12 +74,7 @@ void Image::writeFile(std::string filePath)
 	fclose(output_file);
 }
 
-void Image::setPixel(int x, int y, int color)
+void Image::setPixel(int x, int y, uchar color)
 {
-	data[weight * y + x] = color;
-}
-
-uchar Image::getPixel(int x, int y)
-{
-	return data[weight * y + x];
+	_data[_width * y + x] = color;
 }
