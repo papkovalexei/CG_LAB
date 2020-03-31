@@ -51,10 +51,13 @@ void Instruments::drawLine(Vertex vertex_start, Vertex vertex_end, double thickn
 	{
 		for (int tempY = (int)(y - ((thickness - 1) / 2)); tempY <= (int)(y - ((thickness - 1) / 2) + thickness); tempY++)
 		{
-			if (steep)
-				setPixel(tempY, x, colorCorrection(tempY, x, 1 - min(1.0, (thickness + 1.0) / 2.0 - fabs(y - tempY)), brightness));
-			else
-				setPixel(x, tempY, colorCorrection(x, tempY, 1 - min(1.0, (thickness + 1.0) / 2.0 - fabs(y - tempY)), brightness));
+			try {
+				if (steep)
+					setPixel(tempY, x, colorCorrection(tempY, x, 1 - min(1.0, (thickness + 1.0) / 2.0 - fabs(y - tempY)), brightness));
+				else
+					setPixel(x, tempY, colorCorrection(x, tempY, 1 - min(1.0, (thickness + 1.0) / 2.0 - fabs(y - tempY)), brightness));
+			}
+			catch (exception & ignore) {}
 		}
 		y += gradient;
 	}
@@ -68,10 +71,13 @@ void Instruments::drawLine(Vertex vertex_start, Vertex vertex_end, double thickn
 
 		for (int tempY = (int)(y - (thickness - 1) / 2.0); tempY <= (int)(y - (thickness - 1) / 2.0 + thickness); tempY++)
 		{
-			if (steep)
-				setPixel(tempY, tempX, colorCorrection(tempY, tempX, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { start.x, start.y })), brightness));
-			else
-				setPixel(tempX, tempY, colorCorrection(tempX, tempY, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { start.x, start.y })), brightness));
+			try {
+				if (steep)
+					setPixel(tempY, tempX, colorCorrection(tempY, tempX, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { start.x, start.y })), brightness));
+				else
+					setPixel(tempX, tempY, colorCorrection(tempX, tempY, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { start.x, start.y })), brightness));
+			}
+			catch (exception & ignore) {}
 		}
 	}
 
@@ -81,10 +87,13 @@ void Instruments::drawLine(Vertex vertex_start, Vertex vertex_end, double thickn
 
 		for (int tempY = (int)(y - (thickness - 1) / 2.0); tempY <= (int)(y - (thickness - 1) / 2.0 + thickness); tempY++)
 		{
-			if (steep)
-				setPixel(tempY, tempX, colorCorrection(tempY, tempX, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { end.x, end.y })), brightness));
-			else
-				setPixel(tempX, tempY, colorCorrection(tempX, tempY, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { end.x, end.y })), brightness));
+			try {
+				if (steep)
+					setPixel(tempY, tempX, colorCorrection(tempY, tempX, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { end.x, end.y })), brightness));
+				else
+					setPixel(tempX, tempY, colorCorrection(tempX, tempY, 1 - min(1.0, (thickness + 0.5) / 2.0 - distance({ (double)(tempX), (double)(tempY) }, { end.x, end.y })), brightness));
+			}
+			catch (exception & ignore) {}
 		}
 	}
 }

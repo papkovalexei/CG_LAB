@@ -13,9 +13,12 @@ int main(int argc, char** argv)
 		Instruments instrument;
 		
 		instrument.readFile(argv[1]);
-
-		instrument.drawLine(Vertex(atof(argv[5]), atof(argv[6])), Vertex(atof(argv[7]), atof(argv[8])), atof(argv[4]), atof(argv[3]));
-
+		try {
+			instrument.drawLine(Vertex(atof(argv[5]), atof(argv[6])), Vertex(atof(argv[7]), atof(argv[8])), atof(argv[4]), atof(argv[3]));
+		}
+		catch (exception & ex) {
+			cerr << ex.what() << endl;
+		}
 		instrument.writeFile(argv[2]);
 	}
 
