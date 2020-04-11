@@ -9,8 +9,15 @@ public:
 							JARVIS_JUDICE_NINKE, SIERRA, ATKINSOM, HALFTONE };
 
 	void dithering(DITHERING_TYPE type);
+
+	void setGamma(double gamma) { this->gamma = gamma; }
+	void setBit(unsigned short bit) { this->bit = bit; }
 private:
-	uchar colorCorrection(double x, double y, double transparency, double brightness);
+	double nearestColor(double color);
+	double colorCorrect(double color);
+
+	double gamma;
+	unsigned short bit;
 
 	const double ordered_matrix[8][8] = {
 	{0.0 / 64.0, 48.0 / 64.0, 12.0 / 64.0, 60.0 / 64.0, 3.0 / 64.0, 51.0 / 64.0, 15.0 / 64.0, 63.0 / 64.0},

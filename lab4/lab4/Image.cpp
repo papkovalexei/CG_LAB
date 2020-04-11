@@ -35,6 +35,8 @@ void Image::readFile(std::string filePath)
 	if (check_exist_comment == '#')
 		while ((check_exist_comment = fgetc(input_file) != '\n'))
 			;
+	else
+		ungetc(check_exist_comment, input_file);
 	// End 'skip comment'
 
 	if (fscanf(input_file, "%i %i\n%i\n", &_width, &_height, &_depthPixel) != 3)
