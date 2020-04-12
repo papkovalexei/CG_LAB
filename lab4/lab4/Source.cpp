@@ -15,7 +15,10 @@ int main(int argc, char** argv)
 		image.setGamma(atof(argv[6]));
 		image.setBit(atoi(argv[5]));
 
-		image.dithering(Dithering::ORDERED);
+		if (atoi(argv[3]) == 1)
+			image.drawGradient();
+
+		image.dithering(Dithering::HALFTONE);
 
 		image.writeFile(argv[2]);
 	}
