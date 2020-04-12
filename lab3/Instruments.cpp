@@ -12,11 +12,9 @@ uchar Instruments::colorCorrection(double x, double y, double transparency, doub
 
 	transparency = max(0.0, min(1.0, transparency));
 
-	double lineColor = brightness / 255.0;
 	int y1 = y, x1 = x;
-	double sRGBColor = _data[y1 * _width + x1] / 255.0;
-	double imageLineColor = sRGBColor <= 0.04045 ? sRGBColor / 12.92 : pow((sRGBColor + 0.055) / 1.055, 2.4);
-	double color = (1 - transparency) * lineColor + transparency * imageLineColor;
+
+	double color = (1 - transparency) * brightness / 255.0 + transparency * _data[y1 * _width + x1] / 255.0 <= 0.04045 ? _data[y1 * _width + x1] / 255.0 / 12.92 : pow((_data[y1 * _width + x1] / 255.0 + 0.055) / 1.055, 2.4);
 	double sRGBc = color <= 0.0031308 ? 12.92 * color : 1.055 * pow(color, 1 / 2.4) - 0.055;
 
 	return 255 * sRGBc;
