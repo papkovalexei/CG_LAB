@@ -5,20 +5,20 @@
 class Dithering : public Image
 {
 public:
-	enum DITHERING_TYPE { NONE, ORDERED, RANDOM, FLOYD_STEINBERG, 
-							JARVIS_JUDICE_NINKE, SIERRA, ATKINSOM, HALFTONE };
+	enum DITHERING_TYPE { NONE = 0, ORDERED = 1, RANDOM = 2, FLOYD_STEINBERG = 3, 
+							JARVIS_JUDICE_NINKE = 4, SIERRA = 5, ATKINSOM = 6, HALFTONE = 7 };
 
 	void dithering(DITHERING_TYPE type);
 	void drawGradient();
 
 	void setGamma(double gamma) { this->gamma = gamma; }
-	void setBit(unsigned short bit) { this->bit = bit; }
+	void setBit(int bit) { this->bit = bit; }
 private:
 	double nearestColor(double color);
 	double colorCorrect(double color);
 
 	double gamma;
-	unsigned short bit;
+	unsigned int bit;
 
 	const double ORDERED_MATRIX[8][8] = {
 	{0.0 / 64.0, 48.0 / 64.0, 12.0 / 64.0, 60.0 / 64.0, 3.0 / 64.0, 51.0 / 64.0, 15.0 / 64.0, 63.0 / 64.0},

@@ -62,8 +62,6 @@ void Image::writeFile(std::string filePath)
 
 	fprintf(output_file, "P5\n");
 
-	fprintf(output_file, "# Created by Alexei Papkov M3111\n");
-
 	fprintf(output_file, "%i %i\n%i\n", Image::_width, Image::_height, Image::_depthPixel);
 
 	if (fwrite(Image::_data, sizeof(uchar), Image::_height * Image::_width, output_file) != Image::_width * Image::_height)

@@ -17,9 +17,8 @@ int main(int argc, char** argv)
 
 		if (atoi(argv[3]) == 1)
 			image.drawGradient();
-
-		image.dithering(Dithering::HALFTONE);
-
+		image.dithering((Dithering::DITHERING_TYPE)atoi(argv[4]));
+		
 		image.writeFile(argv[2]);
 	}
 
