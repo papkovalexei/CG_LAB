@@ -73,13 +73,14 @@ void Dithering::dithering(DITHERING_TYPE type)
 
         for (int i = 0; i < _width * _height; i++)
         {
-            double bufferColor = (nearestColor(_data[i]) + (255 / (bit)) * ((double)rand() / 32767.0 - 0.75)) / (double)255;
+            double bufferColor = (nearestColor(_data[i]) + (255 / (bit)) * (static_cast<double>(rand()) / 32767.0 - 0.75)) / static_cast <double>(255);
 
             if (bufferColor < 0)
                 bufferColor = 0;
 
             bufferColor *= power;
             bufferColor = round(bufferColor);
+
             _data[i] = round(colorCorrect(bufferColor * (255 / (power - 1))));
         }
         break;
@@ -87,7 +88,7 @@ void Dithering::dithering(DITHERING_TYPE type)
         for (int y = 0; y < _height; y++)
             for (int x = 0; x < _width; x++)
             {
-                double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / (double)255;
+                double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / static_cast<double>(255);
 
                 bufferColor *= (power - 1);
 
@@ -118,7 +119,7 @@ void Dithering::dithering(DITHERING_TYPE type)
         for (int y = 0; y < _height; y++)
             for (int x = 0; x < _width; x++)
             {
-                double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / (double)255;
+                double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / static_cast<double>(255);
 
                 bufferColor *= (power - 1);
                 bufferColor = round(bufferColor);
@@ -150,7 +151,7 @@ void Dithering::dithering(DITHERING_TYPE type)
         for (int y = 0; y < _height; y++)
             for (int x = 0; x < _width; x++)
             {
-                double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / (double)255;
+                double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / static_cast<double>(255);
 
                 bufferColor *= (power - 1);
                 bufferColor = round(bufferColor);
@@ -182,7 +183,7 @@ void Dithering::dithering(DITHERING_TYPE type)
         for (int y = 0; y < _height; y++)
             for (int x = 0; x < _width; x++)
             {
-                double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / (double)255;
+                double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / static_cast<double>(255);
 
                 bufferColor *= (power - 1);
                 bufferColor = round(bufferColor);
