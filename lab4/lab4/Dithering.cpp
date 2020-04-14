@@ -49,8 +49,8 @@ void Dithering::dithering(DITHERING_TYPE type)
     int power = pow(2, bit);
     vector<double> translateError(_width * _height);
 
-	switch (type)
-	{
+    switch (type)
+    {
     case Dithering::NONE:
         break;
     case Dithering::ORDERED:
@@ -85,7 +85,6 @@ void Dithering::dithering(DITHERING_TYPE type)
         break;
     case Dithering::FLOYD_STEINBERG:
         for (int y = 0; y < _height; y++)
-        {
             for (int x = 0; x < _width; x++)
             {
                 double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / (double)255;
@@ -105,20 +104,18 @@ void Dithering::dithering(DITHERING_TYPE type)
 
                 if (y + 1 < _height)
                 {
-                    if (x + 1 < _width) 
+                    if (x + 1 < _width)
                         translateError[(y + 1) * _width + x + 1] += error * (1.0 / 16.0);
 
                     translateError[(y + 1) * _width + x] += error * (5.0 / 16.0);
 
                     if (y - 1 > 0 && x - 1 > 0)
-                        translateError[(y - 1) * _width + x - 1] += error* (3.0 / 16.0);
+                        translateError[(y - 1) * _width + x - 1] += error * (3.0 / 16.0);
                 }
             }
-        }
         break;
     case Dithering::JARVIS_JUDICE_NINKE:
         for (int y = 0; y < _height; y++)
-        {
             for (int x = 0; x < _width; x++)
             {
                 double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / (double)255;
@@ -132,7 +129,6 @@ void Dithering::dithering(DITHERING_TYPE type)
                 _data[y * _width + x] = bufferColor;
 
                 for (int temp = 0; temp <= 2; temp++)
-                {
                     for (int temp1 = -2; temp1 <= 2; temp1++)
                     {
                         if (y + temp < _height) {
@@ -148,13 +144,10 @@ void Dithering::dithering(DITHERING_TYPE type)
                             }
                         }
                     }
-                }
             }
-        }
         break;
     case Dithering::SIERRA:
         for (int y = 0; y < _height; y++)
-        {
             for (int x = 0; x < _width; x++)
             {
                 double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / (double)255;
@@ -168,7 +161,6 @@ void Dithering::dithering(DITHERING_TYPE type)
                 _data[y * _width + x] = bufferColor;
 
                 for (int temp = 0; temp <= 2; temp++)
-                {
                     for (int temp1 = -2; temp1 <= 2; temp1++)
                     {
                         if (y + temp < _height) {
@@ -184,13 +176,10 @@ void Dithering::dithering(DITHERING_TYPE type)
                             }
                         }
                     }
-                }
             }
-        }
         break;
     case Dithering::ATKINSOM:
         for (int y = 0; y < _height; y++)
-        {
             for (int x = 0; x < _width; x++)
             {
                 double bufferColor = (nearestColor(_data[y * _width + x]) + translateError[y * _width + x]) / (double)255;
@@ -204,7 +193,6 @@ void Dithering::dithering(DITHERING_TYPE type)
                 _data[y * _width + x] = bufferColor;
 
                 for (int temp = 0; temp <= 2; temp++)
-                {
                     for (int temp1 = -2; temp1 <= 2; temp1++)
                     {
                         if (y + temp < _height) {
@@ -220,9 +208,7 @@ void Dithering::dithering(DITHERING_TYPE type)
                             }
                         }
                     }
-                }
             }
-        }
         break;
     case Dithering::HALFTONE:
         for (int y = 0; y < _height; y++)
@@ -233,7 +219,7 @@ void Dithering::dithering(DITHERING_TYPE type)
                 if (bufferColor < 0)
                     bufferColor = 0;
 
-                bufferColor *= power - 1;
+                bufferColor *= power;
                 bufferColor = round(bufferColor);
 
                 _data[y * _width + x] = round(colorCorrect(bufferColor * (255 / (power - 1))));
@@ -241,5 +227,5 @@ void Dithering::dithering(DITHERING_TYPE type)
         break;
     default:
         break;
-	}
+    }
 }
