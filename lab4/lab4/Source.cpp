@@ -21,6 +21,11 @@ int main(int argc, char** argv)
 		
 		image.writeFile(argv[2]);
 	}
+	else
+	{
+		cerr << "Incorrect arguments" << endl;
+		return 1;
+	}
 
 	return 0;
 }
