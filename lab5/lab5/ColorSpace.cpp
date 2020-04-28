@@ -1,5 +1,7 @@
 #pragma warning(disable : 4996)
 
+#include <algorithm>
+
 #include "ColorSpace.h"
 
 void ColorSpace::setInputFile(const string& input_file)
@@ -195,17 +197,19 @@ void ColorSpace::readPNM(const string& filePath)
 
 	Data* _data1 = new Data[_width * _height];
 
-	if (fread(_data1, sizeof(Data), _height * _width, input_file) != _width * _height * 3)
+	if (fread(_data1, sizeof(Data), _height * _width, input_file) != _width * _height)
 	{
 		std::cerr << "Error read file" << std::endl;
 		exit(1);
 	}
 
+	ColorSpace::_data = new Data[_height * _width];
+
 	for (size_t i = 0; i < _height * _width; i++)
 	{
-		ColorSpace::_data[i].first = _data[i].first;
-		ColorSpace::_data[i].second = _data[i].second;
-		ColorSpace::_data[i].third = _data[i].third;
+		ColorSpace::_data[i].first = _data1[i].first;
+		ColorSpace::_data[i].second = _data1[i].second;
+		ColorSpace::_data[i].third = _data1[i].third;
 	}
 
 	fclose(input_file);
@@ -249,7 +253,7 @@ void ColorSpace::writePNM(const string& filePath)
 
 	fprintf(output_file, "%i %i\n%i\n", _width, _height, _depthPixel);
 
-	if (fwrite(_data, sizeof(Data), _height * _width, output_file) != _width * _height * 3)
+	if (fwrite(_data, sizeof(Data), _height * _width, output_file) != _width * _height)
 	{
 		std::cerr << "Error write file" << std::endl;
 		fclose(output_file);
@@ -305,6 +309,8 @@ void ColorSpace::writeFile()
 
 void ColorSpace::convertToRGB()
 {
+	double Kr = 0.0722, Kg = 0.2126, Kb = 0.7152;
+
 	switch (_from_color_space)
 	{
 	case RGB: // done
@@ -319,72 +325,72 @@ void ColorSpace::convertToRGB()
 		break;
 	case HSL: // done
 	case HSV: // done
-		for (size_t i = 0; i < _height * _width; i++)
+		for (int i = 0; i < _height * _width; i++)
 		{
-			double H, S, V;
 			double R, G, B;
+			double H = (_data[i].first / 255.0) * 360.0;
+			double S = _data[i].second / 255.0;
+			double L = _data[i].third / 255.0;
+			double C, X, M;
 
-			H = ((double)_data[i].first / 255) * 360;
-			S = _data[i].second;
-			V = _data[i].third;
-
-			double C = V * S;
-			double X = C * (1 - abs(fmod(H / 60, 2) - 1));
-			double M = V - C;
-
-			if (_from_color_space == HSL)
-			{
-				C = (1 - abs(2 * V - 1)) * S;
+			if (_from_color_space == HSL) {
+				C = (1 - abs(2 * L - 1)) * S;
 				X = C * (1 - abs(fmod(H / 60, 2) - 1));
-				M = (V - C) / 2;
+				M = L - C / 2.0;
+			}
+			else
+			{
+				C = S * L;
+				X = C * (1.0 - abs(fmod(H / 60, 2) - 1.0));
+				M = L - C;
 			}
 
-			if (0 <= H && H < 60)
+			M *= 255.0;
+
+			if (H >= 0 && H <= 60)
 			{
-				R = C;
-				G = X;
-				B = 0;
+				R = C * 255.0 + M;
+				G = X * 255.0 + M;
+				B = M;
 			}
-			else if (60 <= H && H < 120)
+			if (H > 60 && H <= 120)
 			{
-				R = X;
-				G = C;
-				B = 0;
+				R = X * 255.0 + M;
+				G = C * 255.0 + M;
+				B = M;
 			}
-			else if (120 <= H && H < 180)
+			if (H > 120 && H <= 180)
 			{
-				R = 0;
-				G = C;
-				B = X;
+				R = M;
+				G = C * 255.0 + M;
+				B = X * 255.0 + M;
 			}
-			else if (180 <= H && H < 240)
+			if (H > 180 && H <= 240)
 			{
-				R = 0;
-				G = X;
-				B = C;
+				R = M;
+				G = X * 255.0 + M;
+				B = C * 255.0 + M;
 			}
-			else if (240 <= H && H < 300)
+			if (H > 240 && H <= 300)
 			{
-				R = X;
-				G = 0;
-				B = C;
+				R = X * 255.0 + M;
+				G = M;
+				B = C * 255.0 + M;
 			}
-			else if (300 <= H && H < 360)
+			if (H > 300 && H <= 360)
 			{
-				R = C;
-				G = 0;
-				B = X;
+				R = C * 255.0 + M;
+				G = M;
+				B = X * 255.0 + M;
 			}
 
-			_data[i].first = (R + M) * 255;
-			_data[i].second = (G + M) * 255;
-			_data[i].third = (B + M) * 255;
+			_data[i].first = R;
+			_data[i].second = G;
+			_data[i].third = B;
 		}
 		break;
 	case YCbCr_601: // done
 	case YCbCr_709: // done
-		double Kr = 0.0722, Kg = 0.2126, Kb = 0.7152;
-
 		if (_from_color_space == YCbCr_601)
 		{
 			Kr = 0.299;
@@ -397,10 +403,9 @@ void ColorSpace::convertToRGB()
 			double Y, Cb, Cr;
 			double R, G, B;
 
-			Y = _data[i].first / 255;
-			Cb = _data[i].second / 255 - 0.5;
-			Cb = _data[i].third / 255 - 0.5;
-
+			Y = _data[i].first / 255.0;
+			Cb = (_data[i].second / 255.0) - 0.5;
+			Cr = (_data[i].third / 255.0) - 0.5;
 			R = (Y + Cr * (2.0 - 2.0 * Kr));
 			G = (Y - (Kb / Kg) * (2.0 - 2.0 * Kb) * Cb - (Kr / Kg) * (2.0 - 2.0 * Kr) * Cr);
 			B = (Y + (2.0 - 2.0 * Kb) * Cb);
@@ -445,7 +450,7 @@ void ColorSpace::convertToRGB()
 				R = 1;
 
 			if (G < 0)
-				R = 0;
+				G = 0;
 			else if (G > 1)
 				G = 1;
 
@@ -459,12 +464,90 @@ void ColorSpace::convertToRGB()
 			_data[i].third = B * 255.0;
 		}
 		break;
+	}
+
+	_from_color_space = RGB;
+}
+
+void ColorSpace::convert()
+{
+	convertToRGB();
+
+	switch (_to_color_space)
+	{
+	case CMY:
+		for (size_t i = 0; i < _height * _width; i++)
+		{
+			_data[i].first = 255 - _data[i].first;
+			_data[i].second = 255 - _data[i].second;
+			_data[i].third = 255 - _data[i].third;
+		}
+		break;
+	case HSL:
+	case HSV:
+		for (size_t i = 0; i < _height * _width; i++)
+		{
+			double R, G, B;
+			double H, S, L, V;
+			double C, X, M;
+
+			R = _data[i].first / 255.0;
+			G = _data[i].second / 255.0;
+			B = _data[i].third / 255.0;
+
+			V = max(R, max(G, B));
+			C = max(R, max(G, B)) - min(R, min(G, B));
+			L = V - C / 2;
+
+			if (C == 0)
+				H = 0;
+			else
+			{
+				if (V == R)
+					H = (60.0) * ((G - B) / C);
+				else if (V == G)
+					H = (60.0) * (2 + (B - R) / C);
+				else if (V == B)
+					H = (60.0) * (4 + (R - G) / C);
+				else
+					H = 0;
+			}
+
+			if (_to_color_space == HSL)
+			{
+				S = ((L == 0) || (L == 1)) ? 0 : ((V - L) / min(L, 1 - L));
+				_data[i].third = L * 255.0;
+			}
+			else
+			{
+				S = (V == 0) ? 0 : C / V;
+				_data[i].third = V * 255.0;
+			}
+
+			_data[i].first = (H / 360.0) * 255.0;
+			_data[i].second = S * 255.0;
+		}
+		break;
+	case RGB:
+		break;
+	case YCbCr_601:
+	case YCbCr_709:
+		double Kr = 0.0722, Kg = 0.2126, Kb = 0.7152;
+		
+		if (_to_color_space == YCbCr_601)
+		{
+			Kr = 0.299;
+			Kg = 0.587;
+			Kb = 0.114;
+		}
+
+		for (size_t i = 0; i < _height * _width; i++)
+		{
+
+		}
+
+		break;
 	default:
 		break;
 	}
-}
-
-void convert()
-{
-	
 }

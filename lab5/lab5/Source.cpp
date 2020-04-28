@@ -132,6 +132,7 @@ int main(int argc, char** argv)
 	cout << "From: " << func(image._from_color_space) << endl;
 	cout << "To: " << func(image._to_color_space) << endl;
 
+	image.convert();
 	image.writeFile();
 
 	return 0;
