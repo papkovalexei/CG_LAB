@@ -17,7 +17,7 @@ void Image::readFile(std::string filePath)
 
 	fgets(buffer, sizeof(buffer), input_file);
 
-	if (buffer[0] != 'P')
+	if (buffer[0] != 'P' || strlen(buffer) > 3)
 	{
 		std::cerr << "Error image format" << std::endl;
 		exit(1);
@@ -61,8 +61,6 @@ void Image::writeFile(std::string filePath)
 	FILE* output_file = fopen(filePath.c_str(), "wb");
 
 	fprintf(output_file, "P5\n");
-
-	fprintf(output_file, "# Created by Alexei Papkov M3111\n");
 
 	fprintf(output_file, "%i %i\n%i\n", Image::_width, Image::_height, Image::_depthPixel);
 
