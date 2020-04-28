@@ -18,7 +18,6 @@ public:
 private:
 	int _pixelFormat;
 	int _depthPixel;
-protected:
 	int _width, _height;
 	uchar* _data;
 };

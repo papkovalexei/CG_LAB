@@ -45,8 +45,8 @@ void Image::readFile(std::string filePath)
 		exit(1);
 	}
 
-	Image::_data = (uchar*)malloc(Image::_width * Image::_height * sizeof(uchar));
-
+	Image::_data = new uchar[Image::_width * Image::_height];
+	
 	if (fread(Image::_data, sizeof(uchar), Image::_height * Image::_width, input_file) != Image::_width * Image::_height)
 	{
 		std::cerr << "Error read file" << std::endl;

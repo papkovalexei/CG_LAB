@@ -21,9 +21,15 @@
     <ClCompile Include="Image.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="ColorSpace.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Image.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorSpace.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
