@@ -141,6 +141,8 @@ void ColorSpace::readPGM(const string& filePath1, const string& filePath2, const
 		exit(1);
 	}
 
+	ColorSpace::_data = new Data[_height * _width];
+
 	for (size_t i = 0; i < _height * _width; i++)
 	{
 		ColorSpace::_data[i].first = _data1[i];
@@ -223,9 +225,9 @@ void ColorSpace::writePGM(const string& filePath1, const string& filePath2, cons
 	output_file2 = fopen(filePath2.c_str(), "wb");
 	output_file3 = fopen(filePath3.c_str(), "wb");
 
-	fprintf(output_file1, "P6\n");
-	fprintf(output_file2, "P6\n");
-	fprintf(output_file3, "P6\n");
+	fprintf(output_file1, "P5\n");
+	fprintf(output_file2, "P5\n");
+	fprintf(output_file3, "P5\n");
 
 	fprintf(output_file1, "%i %i\n%i\n", _width, _height, _depthPixel);
 	fprintf(output_file2, "%i %i\n%i\n", _width, _height, _depthPixel);
@@ -345,7 +347,7 @@ void ColorSpace::convertToRGB()
 				M = L - C;
 			}
 
-			M *= 255.0;
+			M *= 255;
 
 			if (H >= 0 && H <= 60)
 			{
@@ -425,9 +427,9 @@ void ColorSpace::convertToRGB()
 			else if (B > 1)
 				B = 1;
 
-			_data[i].first = R * 255;
-			_data[i].second = G * 255;
-			_data[i].third = B * 255;
+			_data[i].first = R * 255.0;
+			_data[i].second = G * 255.0;
+			_data[i].third = B * 255.0;
 		}
 		break;
 	case YCoCg: // done
@@ -471,6 +473,7 @@ void ColorSpace::convertToRGB()
 
 void ColorSpace::convert()
 {
+	double Kr = 0.0722, Kg = 0.2126, Kb = 0.7152;
 	convertToRGB();
 
 	switch (_to_color_space)
@@ -504,11 +507,11 @@ void ColorSpace::convert()
 			else
 			{
 				if (V == R)
-					H = (60.0) * ((G - B) / C);
+					H = 60.0 * ((G - B) / C);
 				else if (V == G)
-					H = (60.0) * (2 + (B - R) / C);
+					H = 60.0 * (2 + (B - R) / C);
 				else if (V == B)
-					H = (60.0) * (4 + (R - G) / C);
+					H = 60.0 * (4 + (R - G) / C);
 				else
 					H = 0;
 			}
@@ -532,8 +535,6 @@ void ColorSpace::convert()
 		break;
 	case YCbCr_601:
 	case YCbCr_709:
-		double Kr = 0.0722, Kg = 0.2126, Kb = 0.7152;
-		
 		if (_to_color_space == YCbCr_601)
 		{
 			Kr = 0.299;
@@ -543,9 +544,37 @@ void ColorSpace::convert()
 
 		for (size_t i = 0; i < _height * _width; i++)
 		{
+			double R, G, B, Y, Cb, Cr;
 
+			R = _data[i].first / 255.0;
+			G = _data[i].second / 255.0;
+			B = _data[i].third / 255.0;
+			Y = Kr * R + Kg * G + Kb * B;
+			Cb = 0.5 * ((B - Y) / (1.0 - Kb));
+			Cr = 0.5 * ((R - Y) / (1.0 - Kr));
+
+			_data[i].first = Y * 255.0;
+			_data[i].second = (Cb + 0.5) * 255.0;
+			_data[i].third = (Cr + 0.5) * 255.0;
 		}
+		break;
+	case YCoCg:
+		for (size_t i = 0; i < _width * _height; i++) 
+		{
+			double R, G, B, Y, Co, Cg;
 
+			R = _data[i].first / 255.0;
+			G = _data[i].second / 255.0;
+			B = _data[i].third / 255.0;
+
+			Y = R / 4 + G / 2 + B / 4;
+			Co = R / 2 - B / 2;
+			Cg = -R / 4 + G / 2 - B / 4;
+
+			_data[i].first = Y * 255.0;
+			_data[i].second = (Co + 0.5) * 255.0;
+			_data[i].third = (Cg + 0.5) * 255.0;
+		}
 		break;
 	default:
 		break;

@@ -141,12 +141,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ColorSpace.cpp" />
-    <ClCompile Include="Image.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ColorSpace.h" />
-    <ClInclude Include="Image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
