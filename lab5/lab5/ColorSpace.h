@@ -1,5 +1,17 @@
 #pragma once
-#include "Image.h"
+#include <string>
+#include <iostream>
+
+using namespace std;
+
+typedef unsigned char uchar;
+
+struct Data
+{
+	uchar first;
+	uchar second;
+	uchar third;
+};
 
 class ColorSpace
 {
@@ -16,15 +28,6 @@ public:
 		NONE = 7
 	};
 
-	ColorSpace() 
-	{
-		images = new Image[3];
-	}
-	~ColorSpace()
-	{
-		delete[] images;
-	}
-
 	void setInputFile(const string& input_file);
 	void setOutputFile(const string& output_file);
 	void setFromColorSpace(const Format format);
@@ -37,6 +40,12 @@ public:
 
 	void convert();
 public:
+	void readPGM(const string& filePath1, const string& filePath2, const string& filePath3);
+	void readPNM(const string& filePath);
+
+	void writePGM(const string& filePath1, const string& filePath2, const string& filePath3);
+	void writePNM(const string& filePath);
+
 	string _input_file;
 	string _output_file;
 	Format _from_color_space;
@@ -44,6 +53,9 @@ public:
 	bool _multi_input;
 	bool _multi_output;
 
-	Image* images;
+	Data* _data;
+	int _width;
+	int _height;
+	int _depthPixel;
 };
 

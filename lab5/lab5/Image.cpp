@@ -78,3 +78,4 @@ void Image::setPixel(int x, int y, uchar color)
 {
 	_data[_width * y + x] = color;
 }
+
