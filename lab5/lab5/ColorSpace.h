@@ -46,6 +46,8 @@ public:
 	void writePGM(const string& filePath1, const string& filePath2, const string& filePath3);
 	void writePNM(const string& filePath);
 
+	void convertToRGB();
+
 	string _input_file;
 	string _output_file;
 	Format _from_color_space;

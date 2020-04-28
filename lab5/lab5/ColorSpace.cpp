@@ -1,3 +1,5 @@
+#pragma warning(disable : 4996)
+
 #include "ColorSpace.h"
 
 void ColorSpace::setInputFile(const string& input_file)
@@ -301,4 +303,168 @@ void ColorSpace::writeFile()
 		writePNM(_output_file);
 }
 
+void ColorSpace::convertToRGB()
+{
+	switch (_from_color_space)
+	{
+	case RGB: // done
+		break;
+	case CMY: // done
+		for (size_t i = 0; i < _height * _width; i++)
+		{
+			_data[i].first = 255 - _data[i].first;
+			_data[i].second = 255 - _data[i].second;
+			_data[i].third = 255 - _data[i].third;
+		}
+		break;
+	case HSL: // done
+	case HSV: // done
+		for (size_t i = 0; i < _height * _width; i++)
+		{
+			double H, S, V;
+			double R, G, B;
 
+			H = ((double)_data[i].first / 255) * 360;
+			S = _data[i].second;
+			V = _data[i].third;
+
+			double C = V * S;
+			double X = C * (1 - abs(fmod(H / 60, 2) - 1));
+			double M = V - C;
+
+			if (_from_color_space == HSL)
+			{
+				C = (1 - abs(2 * V - 1)) * S;
+				X = C * (1 - abs(fmod(H / 60, 2) - 1));
+				M = (V - C) / 2;
+			}
+
+			if (0 <= H && H < 60)
+			{
+				R = C;
+				G = X;
+				B = 0;
+			}
+			else if (60 <= H && H < 120)
+			{
+				R = X;
+				G = C;
+				B = 0;
+			}
+			else if (120 <= H && H < 180)
+			{
+				R = 0;
+				G = C;
+				B = X;
+			}
+			else if (180 <= H && H < 240)
+			{
+				R = 0;
+				G = X;
+				B = C;
+			}
+			else if (240 <= H && H < 300)
+			{
+				R = X;
+				G = 0;
+				B = C;
+			}
+			else if (300 <= H && H < 360)
+			{
+				R = C;
+				G = 0;
+				B = X;
+			}
+
+			_data[i].first = (R + M) * 255;
+			_data[i].second = (G + M) * 255;
+			_data[i].third = (B + M) * 255;
+		}
+		break;
+	case YCbCr_601: // done
+	case YCbCr_709: // done
+		double Kr = 0.0722, Kg = 0.2126, Kb = 0.7152;
+
+		if (_from_color_space == YCbCr_601)
+		{
+			Kr = 0.299;
+			Kg = 0.587;
+			Kb = 0.114;
+		}
+
+		for (size_t i = 0; i < _width * _height; i++)
+		{
+			double Y, Cb, Cr;
+			double R, G, B;
+
+			Y = _data[i].first / 255;
+			Cb = _data[i].second / 255 - 0.5;
+			Cb = _data[i].third / 255 - 0.5;
+
+			R = (Y + Cr * (2.0 - 2.0 * Kr));
+			G = (Y - (Kb / Kg) * (2.0 - 2.0 * Kb) * Cb - (Kr / Kg) * (2.0 - 2.0 * Kr) * Cr);
+			B = (Y + (2.0 - 2.0 * Kb) * Cb);
+
+			if (R < 0)
+				R = 0;
+			else if (R > 1)
+				R = 1;
+
+			if (G < 0)
+				R = 0;
+			else if (G > 1)
+				G = 1;
+
+			if (B < 0)
+				B = 0;
+			else if (B > 1)
+				B = 1;
+
+			_data[i].first = R * 255;
+			_data[i].second = G * 255;
+			_data[i].third = B * 255;
+		}
+		break;
+	case YCoCg: // done
+		for (size_t i = 0; i < _width * _height; i++)
+		{
+			double Y, Co, Cg;
+			double R, G, B;
+
+			Y = _data[i].first / 255.0;
+			Co = _data[i].second / 255.0 - 0.5;
+			Cg = _data[i].third / 255.0 - 0.5;
+
+			R = Y + Co - Cg;
+			G = Y + Cg;
+			B = Y - Co - Cg;
+
+			if (R < 0)
+				R = 0;
+			else if (R > 1)
+				R = 1;
+
+			if (G < 0)
+				R = 0;
+			else if (G > 1)
+				G = 1;
+
+			if (B < 0)
+				B = 0;
+			else if (B > 1)
+				B = 1;
+
+			_data[i].first = R * 255.0;
+			_data[i].second = G * 255.0;
+			_data[i].third = B * 255.0;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void convert()
+{
+	
+}
