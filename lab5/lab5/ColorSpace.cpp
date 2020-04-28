@@ -507,24 +507,24 @@ void ColorSpace::convert()
 			else
 			{
 				if (V == R)
-					H = (60.0) * ((G - B) / C);
-				else if (V == G)
-					H = (60.0) * (2 + (B - R) / C);
+					H = 60.0 * ((G - B) / C);
 				else if (V == B)
-					H = (60.0) * (4 + (R - G) / C);
+					H = 60.0 * (4 + (R - G) / C);
+				else if (V == G)
+					H = 60.0 * (2 + (B - R) / C);
 				else
 					H = 0;
 			}
 
-			if (_to_color_space == HSL)
-			{
-				S = ((L == 0) || (L == 1)) ? 0 : ((V - L) / min(L, 1 - L));
-				_data[i].third = L * 255.0;
-			}
-			else
+			if (_to_color_space == HSV)
 			{
 				S = (V == 0) ? 0 : C / V;
 				_data[i].third = V * 255.0;
+			}
+			else
+			{
+				S = ((L == 0) || (L == 1)) ? 0 : ((V - L) / min(L, 1 - L));
+				_data[i].third = L * 255.0;
 			}
 
 			_data[i].first = (H / 360.0) * 255.0;
