@@ -507,11 +507,11 @@ void ColorSpace::convert()
 			else
 			{
 				if (V == R)
-					H = 60.0 * ((G - B) / C);
+					H = (60.0) * ((G - B) / C);
 				else if (V == G)
-					H = 60.0 * (2 + (B - R) / C);
+					H = (60.0) * (2 + (B - R) / C);
 				else if (V == B)
-					H = 60.0 * (4 + (R - G) / C);
+					H = (60.0) * (4 + (R - G) / C);
 				else
 					H = 0;
 			}
